@@ -10,15 +10,6 @@ if(NOT LIBDIR)
   set(LIBDIR lib CACHE STRING "Library installation directory" FORCE)
 endif()
 
-# if(CMAKE_COMPILER_IS_GNUCXX)
-#   set(CXX_FLAGS "-Wall -Wextra")
-# elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-#   set(CXX_FLAGS "-Wall -Wextra")
-# elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-#   set(CXX_FLAGS "-Wall")
-# elseif(MSVC)
-#   set(CXX_FLAGS "/EHsc /W3")
-# endif()
 if(CMAKE_COMPILER_IS_GNUCXX)
   add_compile_options(-Wall -Wextra)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -28,12 +19,6 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 elseif(MSVC)
   add_compile_options(/EHsc /W3)
 endif()
-
-# if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-#   if(MSVC)
-#     set(NOWIDE_SUFFIX "-d")
-#   endif()
-# endif()
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}")
@@ -55,19 +40,33 @@ endforeach()
 
 add_library(nowide SHARED src/iostream.cpp)
 set_target_properties(nowide PROPERTIES VERSION 0.0.0 SOVERSION 0)
+# set_target_properties(nowide PROPERTIES
+#   CLEAN_DIRECT_OUTPUT 1
+#   OUTPUT_NAME "nowide$<$<CONFIG:DEBUG>:d>"
+# )
 set_target_properties(nowide PROPERTIES
   CLEAN_DIRECT_OUTPUT 1
-  OUTPUT_NAME "nowide$<$<CONFIG:DEBUG>:d>"
+  OUTPUT_NAME "nowide"
 )
 
 add_library(nowide-static STATIC src/iostream.cpp)
+# set_target_properties(nowide-static PROPERTIES
+#   CLEAN_DIRECT_OUTPUT 1
+#   OUTPUT_NAME "nowide$<$<CONFIG:DEBUG>:d>"
+# )
 set_target_properties(nowide-static PROPERTIES
   CLEAN_DIRECT_OUTPUT 1
-  OUTPUT_NAME "nowide$<$<CONFIG:DEBUG>:d>"
+  OUTPUT_NAME "nowide"
 )
 
 if(MSVC)
-  set_target_properties(nowide-static PROPERTIES PREFIX "lib")
+  set_target_properties(nowide PROPERTIES
+    DEBUG_POSTFIX "d"
+  )
+  set_target_properties(nowide-static PROPERTIES
+    DEBUG_POSTFIX "d"
+    PREFIX "lib"
+  )
 endif()
 
 add_executable(test_iostream_shared test/test_iostream.cpp)
