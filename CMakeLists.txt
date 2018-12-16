@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.8)
 
 project(Nowide)
 
-# include_directories(.)
 enable_testing()
 
 option(RUN_WITH_WINE "Use wine to run tests" OFF)
@@ -12,7 +11,11 @@ if(NOT LIBDIR)
   set(LIBDIR lib CACHE STRING "Library installation directory" FORCE)
 endif()
 
-set(CMAKE_DEBUG_POSTFIX "-debug")
+if(MSVC)
+  set(CMAKE_DEBUG_POSTFIX "d")
+else()
+  set(CMAKE_DEBUG_POSTFIX "-debug")
+endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX)
   add_compile_options(-Wall -Wextra)
@@ -32,11 +35,7 @@ set(NOWIDE_TESTS
 
 foreach(TEST ${NOWIDE_TESTS})
   add_executable(${TEST} test/${TEST}.cpp)
-  # target_include_directories(${TEST} PUBLIC
-  #   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-  #   $<INSTALL_INTERFACE:include>
-  # )
-  target_include_directories(${TEST} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  target_include_directories(${TEST} PRIVATE ${Nowide_SOURCE_DIR})
   if(RUN_WITH_WINE)
     add_test(NAME ${TEST} WORKING_DIRECTORY ${CMAKE_BUILD_DIR} COMMAND wine ./${TEST}.exe)
   else()
@@ -50,12 +49,7 @@ target_include_directories(nowide PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 set_target_properties(nowide PROPERTIES VERSION 0.0.0 SOVERSION 0)
-# set_target_properties(nowide PROPERTIES COMPILE_DEFINITIONS DLL_EXPORT)
 target_compile_definitions(nowide PRIVATE DLL_EXPORT)
-# set_target_properties(nowide PROPERTIES
-#   CLEAN_DIRECT_OUTPUT 1
-#   OUTPUT_NAME "nowide$<$<CONFIG:DEBUG>:d>"
-# )
 set_target_properties(nowide PROPERTIES
   CLEAN_DIRECT_OUTPUT 1
   OUTPUT_NAME "nowide"
@@ -66,27 +60,17 @@ target_include_directories(nowide-static PUBLIC
   $<BUILD_INTERFACE:${Nowide_SOURCE_DIR}>
   $<INSTALL_INTERFACE:include>
 )
-# set_target_properties(nowide-static PROPERTIES
-#   CLEAN_DIRECT_OUTPUT 1
-#   OUTPUT_NAME "nowide$<$<CONFIG:DEBUG>:d>"
-# )
 set_target_properties(nowide-static PROPERTIES
   CLEAN_DIRECT_OUTPUT 1
   OUTPUT_NAME "nowide"
 )
-
 if(MSVC)
-  set_target_properties(nowide PROPERTIES
-    DEBUG_POSTFIX "d"
-  )
   set_target_properties(nowide-static PROPERTIES
-    DEBUG_POSTFIX "d"
     PREFIX "lib"
   )
 endif()
 
 add_executable(test_iostream_shared test/test_iostream.cpp)
-# set_target_properties(test_iostream_shared PROPERTIES COMPILE_DEFINITIONS DLL_EXPORT)
 target_compile_definitions(test_iostream_shared PRIVATE DLL_EXPORT)
 target_link_libraries(test_iostream_shared nowide)
 
@@ -101,7 +85,6 @@ target_include_directories(test_env_proto PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(test_env_win test/test_env.cpp)
 target_include_directories(test_env_win PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-# set_target_properties(test_env_win PROPERTIES COMPILE_DEFINITIONS NOWIDE_TEST_INCLUDE_WINDOWS)
 target_compile_definitions(test_env_win PRIVATE NOWIDE_TEST_INCLUDE_WINDOWS)
 
 set(OTHER_TESTS test_iostream_shared test_iostream_static test_env_win test_env_proto)
@@ -127,7 +110,6 @@ install(TARGETS nowide nowide-static EXPORT NowideTargets
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION ${LIBDIR}
   ARCHIVE DESTINATION ${LIBDIR}
-  # INCLUDES DESTINATION include
 )
 if(MSVC)
   install(FILES $<TARGET_PDB_FILE:nowide> DESTINATION bin OPTIONAL)
