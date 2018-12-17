@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(Nowide)
+project(Nowide VERSION 0.0.0 LANGUAGES CXX)
 
 enable_testing()
 
@@ -105,7 +105,9 @@ else()
   add_test(test_system_w test_system "-w")
 endif()
 
-
+##
+##  Installation
+##
 install(TARGETS nowide nowide-static EXPORT NowideTargets
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION ${LIBDIR}
@@ -114,10 +116,30 @@ install(TARGETS nowide nowide-static EXPORT NowideTargets
 if(MSVC)
   install(FILES $<TARGET_PDB_FILE:nowide> DESTINATION bin OPTIONAL)
 endif()
+install(DIRECTORY nowide DESTINATION include)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file("NowideConfigVersion.cmake"
+  VERSION ${Nowide_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+
+export(EXPORT NowideTargets
+  FILE "NowideTargets.cmake"
+  NAMESPACE Nowide::
+)
+configure_file(cmake/NowideConfig.cmake
+  "NowideConfig.cmake"
+  COPYONLY
+)
+
 install(EXPORT NowideTargets
   FILE NowideTargets.cmake
   NAMESPACE Nowide::
   DESTINATION lib/cmake/Nowide
 )
-install(DIRECTORY nowide DESTINATION include)
-
+install(FILES
+    cmake/NowideConfig.cmake
+    "${CMAKE_CURRENT_BINARY_DIR}/NowideConfigVersion.cmake"
+  DESTINATION lib/cmake/Nowide
+)
