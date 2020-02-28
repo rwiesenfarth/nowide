@@ -31,13 +31,16 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}")
 
 set(NOWIDE_TESTS
+    benchmark_fstream
     test_convert
     test_stdio
     test_fstream
+    test_stackstring
     )
 
 foreach(TEST ${NOWIDE_TESTS})
     add_executable(${TEST} test/${TEST}.cpp)
+    target_link_libraries(${TEST} nowide)
     if(RUN_WITH_WINE)
        add_test(NAME ${TEST} WORKING_DIRECTORY ${CMAKE_BUILD_DIR} COMMAND wine ./${TEST}.exe)
     else()
@@ -45,14 +48,14 @@ foreach(TEST ${NOWIDE_TESTS})
     endif()
 endforeach()
 
-add_library(nowide SHARED src/iostream.cpp)
+add_library(nowide SHARED src/cstdio.cpp src/cstdlib.cpp src/iostream.cpp)
 set_target_properties(nowide	PROPERTIES VERSION 0.0.0 SOVERSION 0)
 set_target_properties(nowide 	PROPERTIES
 				CLEAN_DIRECT_OUTPUT 1
 				OUTPUT_NAME "nowide${NOWIDE_SUFFIX}"
 			)
 
-add_library(nowide-static STATIC src/iostream.cpp)
+add_library(nowide-static STATIC src/cstdio.cpp src/cstdlib.cpp src/iostream.cpp)
 set_target_properties(nowide-static PROPERTIES
 				CLEAN_DIRECT_OUTPUT 1
 				OUTPUT_NAME "nowide${NOWIDE_SUFFIX}"
@@ -71,10 +74,13 @@ add_executable(test_iostream_static test/test_iostream.cpp)
 target_link_libraries(test_iostream_static nowide-static)
 
 add_executable(test_system test/test_system.cpp)
+target_link_libraries(test_system nowide)
 
 
 add_executable(test_env_proto test/test_env.cpp)
+target_link_libraries(test_env_proto nowide)
 add_executable(test_env_win test/test_env.cpp)
+target_link_libraries(test_env_win nowide)
 set_target_properties(test_env_win PROPERTIES COMPILE_DEFINITIONS NOWIDE_TEST_INCLUDE_WINDOWS)
 
 set(OTHER_TESTS test_iostream_shared test_iostream_static test_env_win test_env_proto)
