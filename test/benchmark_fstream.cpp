@@ -71,7 +71,7 @@ class io_stdio
 public:
     io_stdio(const char* file, bool read)
     {
-        f_ = nw::fopen(file, read ? "r" : "w+");
+        f_ = nw::fopen(file, read ? "rb" : "w+b");
         TEST(f_);
     }
     ~io_stdio()
