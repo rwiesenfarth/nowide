@@ -11,6 +11,9 @@ if(NOT LIBDIR)
   set(LIBDIR lib CACHE STRING "Library installation directory" FORCE)
 endif()
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 if(MSVC)
   set(CMAKE_DEBUG_POSTFIX "d")
 else()
@@ -28,11 +31,11 @@ elseif(MSVC)
 endif()
 
 set(NOWIDE_TESTS
-    benchmark_fstream
+  benchmark_fstream
   test_convert
   test_stdio
   test_fstream
-    test_stackstring
+  test_stackstring
 )
 
 foreach(TEST ${NOWIDE_TESTS})
@@ -80,9 +83,16 @@ target_link_libraries(test_iostream_shared nowide)
 add_executable(test_iostream_static test/test_iostream.cpp)
 target_link_libraries(test_iostream_static nowide-static)
 
-add_executable(test_system test/test_system.cpp)
-target_include_directories(test_system PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(test_system nowide)
+add_executable(test_system_n test/test_system.cpp)
+target_compile_definitions(test_system_n PRIVATE NOWIDE_TEST_USE_NARROW=1)
+target_include_directories(test_system_n PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(test_system_n nowide)
+if(WIN32)
+  add_executable(test_system_w test/test_system.cpp)
+  target_compile_definitions(test_system_w PRIVATE NOWIDE_TEST_USE_NARROW=0)
+  target_include_directories(test_system_w PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  target_link_libraries(test_system_w nowide)
+endif()
 
 add_executable(test_env_proto test/test_env.cpp)
 target_include_directories(test_env_proto PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -9,6 +9,9 @@
 #include "test.hpp"
 #include <nowide/args.hpp>
 #include <nowide/cstdlib.hpp>
+#ifndef NOWIDE_TEST_USE_NARROW
+#include <nowide/convert.hpp>
+#endif
 #include <cstring>
 #include <iostream>
 
