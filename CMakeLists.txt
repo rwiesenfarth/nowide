@@ -130,7 +130,13 @@ install(TARGETS nowide nowide-static EXPORT NowideTargets
   ARCHIVE DESTINATION ${LIBDIR}
 )
 if(MSVC)
+  set_target_properties(nowide-static PROPERTIES
+    COMPILE_PDB_NAME       "nowide"
+    COMPILE_PDB_NAME_DEBUG "nowide${CMAKE_DEBUG_POSTFIX}"
+  )
   install(FILES $<TARGET_PDB_FILE:nowide> DESTINATION bin OPTIONAL)
+  install(FILES "$<TARGET_FILE_DIR:nowide-static>/libnowide.pdb" DESTINATION "${LIBDIR}" OPTIONAL)
+  install(FILES "$<TARGET_FILE_DIR:nowide-static>/libnowide${CMAKE_DEBUG_POSTFIX}.pdb" DESTINATION "${LIBDIR}" OPTIONAL)
 endif()
 install(DIRECTORY nowide DESTINATION include)
 
